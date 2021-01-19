@@ -1,6 +1,4 @@
-USE [MAXPOINT_V3.0]
-GO
-/****** Object:  StoredProcedure [config].[IAE_aplicaclientesformaspago]    Script Date: 19/1/2021 14:52:29 ******/
+/****** Object:  StoredProcedure [config].[IAE_aplicaclientesformaspago]    Script Date: 19/1/2021 14:56:56 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -232,5 +230,3 @@ BEGIN
 	SELECT @accion AS AccionFormaPago--,0 AS rst_id,0 AS rst_descripcion,0 AS agregado,0 AS rsat_bit	
 	END
 END
-
-
