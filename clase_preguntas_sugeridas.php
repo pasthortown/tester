@@ -1,5 +1,4 @@
 <?php
-
 ///////////////////////////////////////////////////////////////////////////
 ////////DESARROLLADO POR JOSE FERNANDEZ////////////////////////////////////
 ///////////DESCRIPCION: Archivo de sentencias sql para manejo de///////////
@@ -14,6 +13,7 @@
 
 class preguntas extends sql {
 
+
     function insertaCabeceraPregunta($accion, $cdnCabecera, $descCabecera, $maxCabecera, $minCabecera, $descPos, $lc_rest, $lc_usuarioId, $respID, $preElimina, $plu, $estado, $respuesta) {
         $lc_query = "exec config.IAE_Cabecera_Preguntas_Sugeridas $accion, $cdnCabecera, '$descCabecera', $maxCabecera, $minCabecera, '$descPos', $lc_rest, '$lc_usuarioId', '$respID', '$preElimina', $plu, '$estado', '$respuesta'";
         if ($this->fn_ejecutarquery($lc_query)) {
@@ -27,6 +27,7 @@ class preguntas extends sql {
 
     function eliminaRespuesta($accion, $cdnCabecera, $descCabecera, $maxCabecera, $minCabecera, $descPos, $lc_rest, $lc_usuarioId, $respID, $preElimina, $plu, $estado, $respuesta) {
         $lc_query = "exec config.IAE_Cabecera_Preguntas_Sugeridas $accion, $cdnCabecera, '$descCabecera', $maxCabecera, $minCabecera, '$descPos', $lc_rest, '$lc_usuarioId', '$respID', $preElimina, $plu, '$estado', '$respuesta'";
+        //print($lc_query);
         return $this->fn_ejecutarquery($lc_query);
     }
 
@@ -50,8 +51,7 @@ class preguntas extends sql {
         return $this->fn_ejecutarquery($lc_query);
     }
 
-    function actualizaCabeceraPregunta($accion, $cdnCabecera, $cabDes, $cabMax, $cabMin, $desPos, $lc_rest, $respID, $cabPregunta, $plu, $cabStd, $respuesta, $lc_usuarioId)
-    {
+    function actualizaCabeceraPregunta($accion, $cdnCabecera, $cabDes, $cabMax, $cabMin, $desPos, $lc_rest, $lc_usuarioId, $respID, $cabPregunta, $plu, $cabStd, $respuesta) {
         $lc_query = "exec config.IAE_Cabecera_Preguntas_Sugeridas $accion, $cdnCabecera, '$cabDes', $cabMax, $cabMin, '$desPos', $lc_rest, '$lc_usuarioId', $respID, '$cabPregunta', $plu, '$cabStd', '$respuesta','$lc_usuarioId'";
         return $this->fn_ejecutarquery($lc_query);
     }
@@ -144,6 +144,7 @@ class preguntas extends sql {
 
     function cargaPlus($cdn, $tipo_producto) {
         $lc_query = "exec config.USP_Carga_Select_Plus_Preguntas_Sugeridas $cdn, '$tipo_producto'";
+        //print($lc_query);
         if ($this->fn_ejecutarquery($lc_query)) {
             while ($row = $this->fn_leerarreglo()) {
                 $this->lc_regs[] = array(
@@ -156,7 +157,7 @@ class preguntas extends sql {
         }
         return json_encode($this->lc_regs);
     }
-
+ 
     function cargaPreguntaEliminaPreguntaEliminaProducto($resultado, $accion, $cdn_id, $plu_id, $psug_id, $usr_id, $orden) {
         $lc_query = "exec config.USP_Preguntas_Sugeridas_Plus $resultado, $accion, $cdn_id, $plu_id, '$psug_id', '$usr_id', $orden";
         if ($this->fn_ejecutarquery($lc_query)) {
@@ -185,6 +186,7 @@ class preguntas extends sql {
     function mergePreguntaSugerida($accion, $idCadena, $idPregunta, $descripcion, $minimo, $maximo, $descripcionPos, $nivel, $estado, $respuestas, $lc_usuarioId, $idGrupoPregunta)
     {
         $lc_query = "EXEC config.PREGUNTA_SUGERIDA_IAE_preguntas_sugeridas $accion, $idCadena, '$idPregunta', '" . utf8_decode($descripcion) . "', $minimo, $maximo, '" . utf8_decode($descripcionPos) . "', $nivel, '$estado', '$respuestas','$lc_usuarioId', '$idGrupoPregunta'";
+        // print($lc_query);
         if ($this->fn_ejecutarquery($lc_query)) {
             while ($row = $this->fn_leerarreglo()) {
                 $this->lc_regs[] = array('psug_id' => $row['psug_id'],
@@ -201,6 +203,35 @@ class preguntas extends sql {
         }
         return json_encode($this->lc_regs);
     }
+
+
+    function actualizaPreguntaSugerida($idPregunta, $idPreguntaSugerida, $idPreguntaPadre, $lc_usuarioId)
+    {
+        $lc_query = "EXEC config.[PREGUNTA_SUGERIDA_A_respuestas] '$idPregunta', '$idPreguntaSugerida', '$idPreguntaPadre', '$lc_usuarioId' ";
+        if ($this->fn_ejecutarquery($lc_query)) {
+            while ($row = $this->fn_leerarreglo()) {
+                $this->lc_regs[] = array('response' => $row['response'],
+                    'idRespuesta' => utf8_encode(trim($row['idRespuesta']))
+                   );
+            }
+            $this->lc_regs['str'] = $this->fn_numregistro();
+        }
+        return json_encode($this->lc_regs);
+    }
+
+
+    function mergePreguntaSugeridaRecursiva( $idPregunta, $descripcion, $nivel,  $lc_usuarioId)
+    {
+        $lc_query = "EXEC config.PREGUNTA_SUGERIDA_IAE_respuestas  '$idPregunta', '" . utf8_decode($descripcion) . "', $nivel, '$lc_usuarioId'";
+       // print($lc_query);
+        if ($this->fn_ejecutarquery($lc_query)) {
+            while ($row = $this->fn_leerarreglo()) {
+            }
+            $this->lc_regs['str'] = $this->fn_numregistro();
+        }
+        return json_encode($this->lc_regs);
+    }
+
     function cargarGrupoPreguntasSugeridas($idCadena) {
         $lc_query = "EXEC config.PREGUNTASUGERIDAS_cargarGrupoPreguntas ".$idCadena;
         if ($this->fn_ejecutarquery($lc_query)) {
@@ -213,4 +244,77 @@ class preguntas extends sql {
         return json_encode($this->lc_regs);
     }
 
+    function cargarPreguntasRecursivas($idPregunta) {
+
+        $lc_query = "exec config.USP_Detalle_Respuestas_Recursivas '$idPregunta'";
+        if ($this->fn_ejecutarquery($lc_query)) {
+            while ($row = $this->fn_leerarreglo()) {
+                $this->lc_regs[] = array(
+                    'plu_num_plu' => utf8_encode(trim($row['plu_num_plu']))
+                    , 'plu_id' => $row['plu_id']
+                    , 'numPlu' => $row['numPlu']
+                    , 'orden' => $row['orden']
+                    , 'level' => $row['LevelPregunta']
+                    , 'descripcion' => utf8_encode(trim($row['descripcion']))
+                    , 'res_descripcion' => utf8_encode(trim($row['res_descripcion']))
+                    , 'res_id' => utf8_encode(trim($row['res_id']))
+                    , 'IDRespuestasPadre' => utf8_encode(trim($row['IDRespuestasPadre']))
+                    , 'pregunta_sugerida' => utf8_encode(trim($row['pregunta_sugerida'])
+                ));
+            }
+            $this->lc_regs['str'] = $this->fn_numregistro();
+        }
+        return json_encode($this->lc_regs);
+    }
+
+    function cargarPreguntasSugeridas() {
+
+        $lc_query = "exec config.USP_Preguntas_Sugeridas ";
+        if ($this->fn_ejecutarquery($lc_query)) {
+            while ($row = $this->fn_leerarreglo()) {
+                $this->lc_regs[] = array(
+                    'IDPreguntaSugerida' => utf8_encode(trim($row['IDPreguntaSugerida']))
+                    , 'psug_descripcion_pos' => utf8_encode(trim($row['psug_descripcion_pos'])));
+            }
+            $this->lc_regs['str'] = $this->fn_numregistro();
+        }
+        return   json_encode($this->lc_regs);
+    }
+
+
+
+    function cargarPreguntasRecursivas1($idPregunta) {
+        $lc_query = "exec config.obtener_json_preguntas_recursivas_temp '$idPregunta'";
+        if ($this->fn_ejecutarquery($lc_query)) {
+            while ($row = $this->fn_leerarreglo()) {
+                $this->lc_regs[] = array(
+                    'json_data' => utf8_encode(trim($row['json_data'])));
+            }
+            $this->lc_regs['str'] = $this->fn_numregistro();
+        }
+        return json_encode($this->lc_regs);
+    }
+
+    function eliminarRespuestaSugerida($idPregunta) {
+        $lc_query = "exec config.eliminar_respuesta_sugerida '$idPregunta'";
+        if ($this->fn_ejecutarquery($lc_query)) {
+            while ($row = $this->fn_leerarreglo()) {
+              
+            }
+            $this->lc_regs['str'] = $this->fn_numregistro();
+        }
+        return json_encode($this->lc_regs);
+    }
+
+    function fn_validarNivelPreguntas($idCadena) {
+        $this->lc_regs = array();
+        $lc_query = " exec [config].[USP_ObtenerNivelesPreguntasSugeridas] $idCadena";
+        $datos = 0;
+        if ($this->fn_ejecutarquery($lc_query)) {
+            while ($row = $this->fn_leerarreglo()) {
+                $datos = $row[0];
+            }
+        }
+        return $datos;
+    }
 }

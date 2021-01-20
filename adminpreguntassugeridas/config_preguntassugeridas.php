@@ -1,6 +1,6 @@
 <?php
 session_start();
-///////////////////////////////////////////////////////////////////////////
+//////////////////////// ///////////////////////////////////////////////////
 ////////DESARROLLADO POR JOSE FERNANDEZ////////////////////////////////////
 ///////////DESCRIPCION: PANTALLA ADMINISTRACION DE PREGUNTAS SUGERIDAS/////
 ////////FECHA CREACION: 20/05/2015/////////////////////////////////////////
@@ -12,6 +12,7 @@ session_start();
 ///////////////////////////////////////////////////////////////////////////
 include_once '../../system/conexion/clase_sql.php';
 include_once '../../clases/clase_preguntas_sugeridas.php';
+
 
 if (
     empty($_SESSION['rstId'])
@@ -36,9 +37,7 @@ if (htmlspecialchars(isset($_GET['cargarcadena']))) {
                     htmlspecialchars($_GET['cdn']), htmlspecialchars($_GET['tipo_producto'])
     );
 } else if (htmlspecialchars(isset($_GET['insertaCabeceraPregunta']))) {
-    print $lc_estacion->insertaCabeceraPregunta(
-        htmlspecialchars($_GET['accion']), htmlspecialchars($_GET['cdnCabecera']), utf8_decode(htmlspecialchars($_GET['descCabecera'])), htmlspecialchars($_GET['maxCabecera']), htmlspecialchars($_GET['minCabecera']), utf8_decode(htmlspecialchars($_GET['descPos'])), $lc_rest, $lc_usuarioId, htmlspecialchars($_GET['respID']), htmlspecialchars($_GET['preElimina']), htmlspecialchars($_GET['plu']), utf8_decode(htmlspecialchars($_GET['estado'])), utf8_decode(htmlspecialchars($_GET['respuesta']), '')
-    );
+    print $lc_estacion->insertaCabeceraPregunta(htmlspecialchars($_GET['accion']), htmlspecialchars($_GET['cdnCabecera']), utf8_decode(htmlspecialchars($_GET['descCabecera'])), htmlspecialchars($_GET['maxCabecera']), htmlspecialchars($_GET['minCabecera']), utf8_decode(htmlspecialchars($_GET['descPos'])), $lc_rest, $lc_usuarioId, htmlspecialchars($_GET['respID']), htmlspecialchars($_GET['preElimina']), htmlspecialchars($_GET['plu']), utf8_decode(htmlspecialchars($_GET['estado'])), utf8_decode(htmlspecialchars($_GET['respuesta']), '$lc_usuarioId'));
 } else if (htmlspecialchars(isset($_GET['actualizaCabeceraPregunta']))) {
     print $lc_estacion->actualizaCabeceraPregunta(
         htmlspecialchars($_GET['accion']), htmlspecialchars($_GET['cdnCabecera']), utf8_decode(htmlspecialchars($_GET['cabDes'])), htmlspecialchars($_GET['cabMax']), htmlspecialchars($_GET['cabMin']), utf8_decode(htmlspecialchars($_GET['desPos'])), $lc_rest, $lc_usuarioId, htmlspecialchars($_GET['respID']), htmlspecialchars($_GET['cabPregunta']), htmlspecialchars($_GET['plu']), htmlspecialchars($_GET['cabStd']), utf8_decode(htmlspecialchars($_GET['respuesta']), '$lc_usuarioId')
@@ -56,9 +55,7 @@ if (htmlspecialchars(isset($_GET['cargarcadena']))) {
                     htmlspecialchars($_GET['accion']), htmlspecialchars($_GET['cdnCabecera']), utf8_decode(htmlspecialchars($_GET['descCabecera'])), htmlspecialchars($_GET['maxCabecera']), htmlspecialchars($_GET['minCabecera']), utf8_decode(htmlspecialchars($_GET['descPos'])), $lc_rest, $lc_usuarioId, htmlspecialchars($_GET['respID']), htmlspecialchars($_GET['preElimina']), htmlspecialchars($_GET['plu']), utf8_decode(htmlspecialchars($_GET['estado'])), utf8_decode(htmlspecialchars($_GET['respuesta']))
     );
 } else if (htmlspecialchars(isset($_GET['cargaLosDetalles']))) {
-    print $lc_estacion->cargaLosDetalles(
-                    htmlspecialchars($_GET['preIDdetalle'])
-    );
+    print $lc_estacion->cargaLosDetalles(htmlspecialchars($_GET['preIDdetalle'])  );
 } else if (htmlspecialchars(isset($_GET['cargarDetallePreguntasInicio']))) {
     print $lc_estacion->cargarDetallePreguntasInicio(
                     0, 0, htmlspecialchars($_GET['cadenaDetalle']), htmlspecialchars($_GET['aBuscar']), 0, false
@@ -117,7 +114,37 @@ if (htmlspecialchars(isset($_GET['cargarcadena']))) {
          , $lc_usuarioId
          , htmlspecialchars($_POST['idGrupo'])
     );
-} else if (htmlspecialchars(isset($_POST['cargarGrupoPreguntasSugeridas']))) {
+} else if (htmlspecialchars(isset($_POST['actualizaPreguntaSugerida']))) {
+    print $lc_estacion->actualizaPreguntaSugerida(
+          htmlspecialchars($_POST['idPregunta'])
+        , htmlspecialchars($_POST['idPreguntaSugerida'])
+        , htmlspecialchars($_POST['idPreguntaPadre'])
+        , $lc_usuarioId);
+} 
+else if (htmlspecialchars(isset($_POST['cargarGrupoPreguntasSugeridas']))) {
     print $lc_estacion->cargarGrupoPreguntasSugeridas($idCadena);
+}  else if (htmlspecialchars(isset($_GET['cargarPreguntasRecursivas']))) {
+    $lc_condiciones[0] = $_GET["preIDdetalle"];
+    print $lc_estacion->cargarPreguntasRecursivas($lc_condiciones[0]);
 }
-
+else if (htmlspecialchars(isset($_GET['cargarPreguntasRecursivas1']))) {
+    $lc_condiciones[0] = $_GET["preIDdetalle"];
+    print $lc_estacion->cargarPreguntasRecursivas1($lc_condiciones[0]);
+  
+} 
+else if (htmlspecialchars(isset($_GET['cargarPreguntaSuegridas']))) {
+    print $lc_estacion->cargarPreguntasSugeridas();
+} 
+else if (htmlspecialchars(isset($_POST['mergePreguntaSugeridaRecursiva']))) {
+    print $lc_estacion->mergePreguntaSugeridaRecursiva(
+                    htmlspecialchars($_POST['idPregunta'])
+                   , htmlspecialchars($_POST['descripcion'])
+                   , htmlspecialchars($_POST['nivel'])
+                   , $lc_usuarioId
+   );
+}else if (htmlspecialchars(isset($_GET['eliminarRespuestaSugerida']))) {
+    $lc_condiciones[0] = $_GET["preIDdetalle"];
+    print $lc_estacion->eliminarRespuestaSugerida($lc_condiciones[0]);
+}else if (htmlspecialchars(isset($_GET["limiteNivelPreguntas"]))) {
+    print $lc_estacion->fn_validarNivelPreguntas($_SESSION['cadenaId']);
+}

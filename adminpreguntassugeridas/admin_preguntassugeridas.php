@@ -36,7 +36,12 @@ include_once '../../clases/clase_seguridades.php';
         <input id="cdn_id" type="hidden" value="<?php echo $_SESSION['cadenaId']; ?>" />
         <input id="pre_id" type="hidden" />
         <input id="plu" type="hidden" />
+        <input id="pluPadre" type="hidden" />
+        <input id="pluSugerida" type="hidden" />
+        <input id="nivelPregunta" type="hidden" />
         <input id="hid_psug_id" type="hidden" />
+        <input id="hid_chk" type="hidden" />
+
 
         <div class="superior" id="div_nuevo">
             <div class="menu" style="width: 300px;" align="center">
@@ -108,12 +113,40 @@ include_once '../../clases/clase_seguridades.php';
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+               
+                    
+                    <div class="row" id="rowPreguntas">
                         <div class="col-xs-1"></div>
                         <div class="col-xs-10">
                             <select class="form-control" id="selPlus" style="text-transform: uppercase;"></select>
                         </div>
                     </div>
+                    <br>
+
+                    <div class="row" >
+                        <div class="col-xs-1"></div>
+                        <div class="col-xs-10">
+                            <input  type="checkbox" name="activoChk" id="activoChk" checked="false" />
+                            <label for="activoChk">Muestra Preguntas Recursivas?</label>
+                        </div>
+                    </div>
+
+
+                    <div class="row" id="rowPadre">
+                        <div class="col-xs-1"></div>
+                        <div class="col-xs-10">
+                            <select class="form-control" id="selPlusPadre" style="text-transform: uppercase;"></select>
+                        </div>
+                    </div>
+                    <br>
+                    
+                    <div class="row" id="rowSugerida">
+                        <div class="col-xs-1"></div>
+                        <div class="col-xs-10">
+                            <select class="form-control" id="selPlusSugeridas" style="text-transform: uppercase;"></select>
+                        </div>
+                    </div>
+
                     <br/> 
                     <div class="row"> 
                         <div class="col-sm-7">
@@ -125,6 +158,33 @@ include_once '../../clases/clase_seguridades.php';
                     <br/>      
                     <div class="modal-footer active panel-footer" align="right">
                         <button class="btn btn-primary" onClick="fn_grabaRespuestaModificada();">Aceptar</button>
+                        <button class="btn btn-default" data-dismiss="modal" onClick="fn_modalesModificados();">Cancelar</button>                
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="modal fade" id="mdl_productos_respuesta" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header active panel-footer">
+                        <h4 class="modal-title" id="myModalLabel">Respuestas</h4>
+                    </div>
+                    
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3 text-right"><h5>Productos:</h5></div>
+                            <div class="col-sm-9">
+                                <h3><input class="form-control" type="hidden" id="txt_respuesta_padre" /></h3>
+                            </div>
+                        </div>
+                    </div>
+               
+                    <div class="modal-footer active panel-footer" align="right">
+                        <button class="btn btn-primary" onClick="fn_grabaRespuestaModificada1();">Aceptar</button>
                         <button class="btn btn-default" data-dismiss="modal" onClick="fn_modalesModificados();">Cancelar</button>                
                     </div>
                 </div>
@@ -158,12 +218,18 @@ include_once '../../clases/clase_seguridades.php';
                             </div>                    
                         </div>
                     </div>
+
                     <div class="row" >
                         <div class="col-xs-1"></div>
+
                         <div class="col-xs-10">
-                            <select class="form-control" id="selPlusNuevo" style="text-transform:uppercase;"></select>     
+                            <select class="form-control" id="selPlusPadre" style="text-transform:uppercase;"></select>     
                         </div>
+                        <!-- <div class="col-xs-10">
+                            <select class="form-control" id="selPlusNuevo" style="text-transform:uppercase;"></select>     
+                        </div> -->
                     </div>
+                    
                     <br/>
                     <div class="row">    
                         <div class="col-sm-7">
@@ -266,10 +332,12 @@ include_once '../../clases/clase_seguridades.php';
                                             <div class="col-md-12" style="height: 280px; overflow:auto;">
                                                 <div id="scroll" class="row" style="overflow-x: hidden; overflow-y: auto">
                                                     <div class="col-xs-1"></div>
-                                                    <div class="col-xs-10">
-                                                        <br/>
+                                                    <div class="col-xs-15">
                                                         <br/>
                                                         <table id="tblPsgRespuestas" class="table table-bordered table-condensed"></table>
+                                                    </div>
+                                                    <div class="col-xs-10">
+                                                        <div id="treeview"></div>
                                                     </div>
                                                 </div>
                                             </div>
