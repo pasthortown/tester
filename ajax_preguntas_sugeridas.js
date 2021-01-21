@@ -16,9 +16,10 @@ var lc_control = -1;
 var grupos = 10;
 var lc_banderaChecks = -1; //VARIABLE PARA LOS RADIO BUTTON
 var lc_estado = ''; //VARIABLE DE LA CLASIFICACION DE PLUS 
-
 var datosPreguntas;
 var checked = false;
+var minimo = 3;
+var maximo = 0;
 
 function justNumbers(e) {
     var keynum = window.event ? window.event.keyCode : e.which;
@@ -30,6 +31,7 @@ function justNumbers(e) {
 }
 
 $(document).ready(function() {
+
     $("#par_numplu").hide();
     $("#img_buscar").hide();
     $("#img_remove").hide();
@@ -39,7 +41,7 @@ $(document).ready(function() {
     fn_btn("cancelar", 0);
     fn_btn("eliminar", 0);
     fn_btn("agregar", 1);
-    fn_muestraDetallePreguntasPorEstado(0, grupos + 1, "activo");
+     fn_muestraDetallePreguntasPorEstado(0, grupos + 1, "activo");
     $("#inicio_preguntas").hide();
     $("#inicio_Respuestas").hide();
     $("#mdl_productos").hide();
@@ -70,7 +72,7 @@ $(document).ready(function() {
     $("#inpPsgDescripcionPregunta").keyup(function() {
         $("#inpPsgDescripcionPreguntaPOS").val($("#inpPsgDescripcionPregunta").val());
     });
-
+ 
     $('#activoChk').change(function() {
         $("#hid_chk").val(this.checked);
         if(this.checked){
@@ -99,7 +101,6 @@ $(document).ready(function() {
     $("#rowPadre").hide();
     $("#rowSugerida").hide();
     $("#activoChk").prop("checked", 0);
-
     cargarGruposPreguntasSugeridas();
 
 });
@@ -137,6 +138,7 @@ function fn_agregar() {
 }
 
 function fn_muestraDetallePreguntas() {
+
     var send;
     var cargarDetallePreguntasInicio = { "cargarDetallePreguntasInicio": 1 };
     lc_banderaChecks = 1;
@@ -313,6 +315,7 @@ function fn_irAmostrarRespuestaNuevo() {
 
 //NUEVO: CARGA LOS PLUS PARA AGREGAR EN LAS RESPUESTAS 
 function fn_cargaPlusRespuesta(opcion) {
+
     var send;
     var cargaPlus = { "cargaPlus": 1 };
     var tipo = opcion;
@@ -394,6 +397,17 @@ function fn_validaNumeroRespuestas() {
     });
 }
 
+var eliminarRespuesta = function(idProducto) {
+        
+    $("#idrespuesta_" + idProducto).remove();
+    var i = 1;
+    $('#tblPsgRespuestas >tbody tr').each(function() {
+        $("#idrespuesta_" + this.id).attr("orden", (i));
+        i++;
+    });
+
+}
+
 //NUEVO: APLICA RESPUESTAS EN LA PREGUNTA SUGERIDA
 function fn_aplicarRespuesta() {
     var send;
@@ -459,23 +473,11 @@ function fn_cierraNuevos() {
     $("#mdlPreguntasSugeridas").modal("hide");
 }
 
-var eliminarRespuesta = function(idProducto) {
-    $("#idrespuesta_" + idProducto).remove();
-    var i = 1;
-    $('#tblPsgRespuestas >tbody tr').each(function() {
-        $("#idrespuesta_" + this.id).attr("orden", (i));
-        i++;
-    });
-};
-
 //Aqui estoy
 function fn_grabaRespuestaModificada() {
-
     
     var datosPlu = $("#pluPadre").val();
     var numPluPadre = datosPlu.split("_");
-    
-    //if(minimo >= ( parseInt(numPluPadre[1]) +1) || numPluPadre[0]== "" ) {
 
     var idPregunta = $("#hid_psug_id").val();
     var idProducto = $("#plu").val();
@@ -483,20 +485,19 @@ function fn_grabaRespuestaModificada() {
     var numPlu = $("#selPlus option:selected").attr("numplu");
     var descripcion = $("#selPlus option:selected").attr("descripcion");
     var orden = $('#tblPsgRespuestas >tbody >tr').length + 1;
+    $("#mdl_rdn_pdd_crgnd").show();
 
     if(numPluPadre[0] == undefined || numPluPadre[0] == "undefined"  || numPluPadre[0] == "" ) {
         numPluPadre ='NODATA'
     }
-
     var activoChkOK = $("#hid_chk").val();
-
-   if(activoChkOK == "true")  {
+    console.log(activoChkOK);
+    if(activoChkOK == "true")  {
     var idPreguntaSugerida = $("#pluSugerida").val();
     var sendSugerida = { "actualizaPreguntaSugerida": 1 };
     sendSugerida.idPregunta = numPluPadre[0];
     sendSugerida.idPreguntaSugerida = idPreguntaSugerida;
     sendSugerida.idPreguntaPadre = numPluPadre[0];
-    console.log(idPreguntaSugerida);
     $.ajax({
         async: false,
         type: "POST",
@@ -506,36 +507,29 @@ function fn_grabaRespuestaModificada() {
         url: "../adminpreguntassugeridas/config_preguntassugeridas.php",
         data: sendSugerida,
         success: function(datos) {
-            if (datos.str > 0) {
-                $("#mdl_productos").modal("hide");
-                $("#mdlPreguntasSugeridas").hide();
-                $("#mdl_rdn_pdd_crgnd").hide();
-            }
-                
+            console.log(datos);
+            $("#mdl_productos").modal("hide");
+            $("#mdlPreguntasSugeridas").modal("show");
+            fn_cargaDetalleDeRespuestas();
+            $("#tblPsgRespuestas").show();
+            $("#mdl_rdn_pdd_crgnd").hide();
         }});
     }else {
-
         $("#tblPsgRespuestas").append("<tr id='idrespuesta_" + idProducto +  "_"+ numPluPadre[0] + "' orden=\"" + orden + "\" ondragover=\"allowDrop(event)\" ondragstart=\"drag(event)\" ondrop=\"drop(event)\" draggable=\"true\">><td style='text-align: center;'>" + numPlu + "</td><td>" + descripcionCanal + "</td><td><a data-type='text' href='#' id='res_dscrpcn" + idProducto + "'>" + descripcion + "</a></td><td style='text-align: center;'><input type='button' name='eliminar' class='opcionAgregado' onclick='eliminarRespuesta(" + idProducto + ");' style=\"background: #666666 url(\'../../imagenes/admin_resources/btn_eliminar.png\') 1px 1px no-repeat; height: 33px; width: 33px;\"/></td>");
         $('#res_dscrpcn' + idProducto).editable({});
-
         $("#mdl_productos").modal("hide");
-        $("#mdlPreguntasSugeridas").modal("show");
-
         $("#mdl_rdn_pdd_crgnd").show();
         var html = "";
         var pregunta = $("#hid_psug_id").val();
         var cadena = "";
+        
         $('#tblPsgRespuestas >tbody >tr').each(function() {
             var idProducto = this.id;
             var orden = $("#" + this.id).attr("orden");
             idProducto = idProducto.substring(12, idProducto.length);
             var respuesta = $(this).find("td").eq(2).find("a").html();
             var res = idProducto.split("_");
-            //if(res != null && res.length >0 && res[1] != undefined) {
             cadena += res[0] + "_" + respuesta + "_" + orden + "_";
-            //}else {
-            //cadena += idProducto + "_" + respuesta + "_" + orden ;
-            //}
         });
         var send = { "mergePreguntaSugeridaRecursiva": 1 };
         send.descripcion = cadena;
@@ -567,38 +561,38 @@ function fn_grabaRespuestaModificada() {
                         this.datosPreguntas  = datos;
                         for (var i = 0; i < datos.str; i++) {
                         // html += " onclick='fn_seleccion(" + i + ",\"" + datos[i]["psug_id"] + "\")' ondblclick='modificar(\"" + datos[i]["psug_id"] + "\", \"" + datos[i]["idGrupo"] + "\")'>";
-                            html = "<tr id='idrespuesta_" + datos[i]["plu_id"] + "' orden=\"" + (i + 1) + "\" ondragover=\"allowDrop(event)\" ondragstart=\"drag(event)\" ondrop=\"drop(event)\" draggable=\"true\">";
+                        html = "<tr id='idrespuesta_" + datos[i]["plu_id"] + "' orden=\"" + (i + 1) + "\" ondragover=\"allowDrop(event)\" ondragstart=\"drag(event)\" ondrop=\"drop(event)\" draggable=\"true\">";
                             html += "<td class='text-center'>" + datos[i]["numPlu"] + "</td>";
-                            html += "<td  onclick='fn_seleccion_sugeridas(\"" + datos[i]["res_descripcion"] + "\",  \"" + datos[i]["res_id"] + "\")'>" + datos[i]["plu_num_plu"] + "</td>";
+                            html += "<td  onclick='fn_seleccion_sugeridas(\"" + datos[i]["res_descripcion"] + "\",  \"" + datos[i]["res_id"] + "\")'>" + datos[i]["plu_num_plu"] +  "<br>" +  '&emsp;'+datos[i]["pregunta_sugerida"] + "</td>";
                             html += "<td><a data-type='text' href='#' id='res_dscrpcn" + datos[i]["plu_id"] + "'>" + datos[i]["res_descripcion"] + "</a></td>";
                             html += "<td style='text-align: center;'><input type='button' name='eliminar' class='opcionAgregado' onclick='fn_eliminarRespuesta(\"" + datos[i]["res_id"] + "\", \"" + datos[i]["plu_id"] + "\" );' style='height: 33px; width: 33px;'/></td></tr>";
-            
                             $("#tblPsgRespuestas").append(html);
                             $("input[name='eliminar']").css("background", "#666666 url('../../imagenes/admin_resources/btn_eliminar.png') 1px 1px no-repeat");
-            
                             $('#res_dscrpcn' + datos[i]["plu_id"]).editable({});
                             
                         }
                     } else {
                         $("#tblPsgRespuestas").append("");
                     }
-                
-                    $("#tblPsgRespuestas").show();
-            
-            
+             
+
                 });
+                $("#mdl_productos").modal("hide");
+                $("#mdlPreguntasSugeridas").modal("show");
+                fn_cargaDetalleDeRespuestas();
+                $("#tblPsgRespuestas").show();
                 $("#mdl_rdn_pdd_crgnd").hide();
             }
         });
 
     }
-    // } else {
-    //     $("#mdl_rdn_pdd_crgnd").hide();
-    //     alertify.alert(
-    //         "La politica de niveles de preguntas solo le permite: " +  minimo + " niveles"
-    //     );
-    //  }
+
 }
+
+function fn_seleccion_sugeridas(event){
+    console.log(event);
+}
+
 
 function fn_eliminarRespuesta(resp_id, idProducto) {
     var send;
@@ -606,6 +600,7 @@ function fn_eliminarRespuesta(resp_id, idProducto) {
     $("#mdl_rdn_pdd_crgnd").show();
     send = eliminaRespuesta;
     send.preIDdetalle = resp_id;
+
     $.getJSON("../adminpreguntassugeridas/config_preguntassugeridas.php", send, function(datos) {
         lc_control = 3;
         fn_cargaDetalleDeRespuestas();
@@ -620,7 +615,6 @@ function fn_eliminarRespuesta(resp_id, idProducto) {
     });
 
 }
-
 
 function fn_eliminarRespuestaModificada(resp_id) {
     var send;
@@ -652,6 +646,7 @@ function fn_grabaRespuesta() {
     var send;
     var grabaRespuesta = { "grabaRespuesta": 1 };
     var Accion = "IR";
+
     if ($("#selPlusNuevo").val() !== "0") {
         $('#mdl_rdn_pdd_crgnd').show();
         var html = "<tr class='bg-primary'><td width='50%' align='center'># Plu</td><td width='30%' align='center'>Respuesta</td><td width='10%' align='center'>Eliminar</td></tr>";
@@ -723,38 +718,51 @@ function fn_cargaDetalleDeRespuestas() {
     var cargaLosDetalles = { "cargaLosDetalles": 1 };
     var html = "<thead><tr class='bg-primary'><th align='center'>NumPlu</th><th align='center'>Producto</th><th align='center'>Respuesta</th><th width='10%' align='center'>Opcion</th></tr></thead>";
     send = cargaLosDetalles;
-    send.preIDdetalle = $("#pre_id").val();
+    send.preIDdetalle =    $("#hid_psug_id").val();//$("#pre_id").val();
     $.getJSON("../adminpreguntassugeridas/config_preguntassugeridas.php", send, function(datos) {
         $("#tblPsgRespuestas").html(html);
         lc_control = 3;
         if (datos.str > 0) {
+            console.log(datos);
             for (var i = 0; i < datos.str; i++) {
-                html = "<tr id='idrespuesta_" + datos[i]["plu_id"] + "'>";
-                html += "<td class='text-left'>" + datos[i]["plu_num_plu"] + "&nbsp;</td>";
-                html += "<td><a data-type='text' href='#' id='res_dscrpcn" + datos[i]["plu_id"] + "'>" + datos[i]["res_descripcion"] + "&nbsp;</a></td>";
+                
+                html = "<tr id='idrespuesta_" + datos[i]["plu_id"] + "' orden=\"" + (i + 1) + "\" ondragover=\"allowDrop(event)\" ondragstart=\"drag(event)\" ondrop=\"drop(event)\" draggable=\"true\">";
+                html += "<td class='text-center'>" + datos[i]["numPlu"] + "</td>";
+                html += "<td  onclick='fn_seleccion_sugeridas(\"" + datos[i]["res_descripcion"] + "\",  \"" + datos[i]["res_id"] + "\")'>" + datos[i]["plu_num_plu"] +  "<br>" +  '&emsp;'+datos[i]["pregunta_sugerida"] +  "</td>";
+                html += "<td><a data-type='text' href='#' id='res_dscrpcn" + datos[i]["plu_id"] + "'>" + datos[i]["res_descripcion"] + "</a></td>";
                 html += "<td style='text-align: center;'><input type='button' name='eliminar' class='opcionAgregado' onclick='fn_eliminarRespuesta(\"" + datos[i]["res_id"] + "\", \"" + datos[i]["plu_id"] + "\" );' style='height: 33px; width: 33px;'/></td></tr>";
-
-                $("#tblPsgRespuestas").append(html);
-                $("input[name='eliminar']").css("background", "#666666 url('../../imagenes/admin_resources/btn_eliminar.png') 1px 1px no-repeat");
-
-                $('#res_dscrpcn' + datos[i]["plu_id"]).editable({
-                    type: 'text',
-                    url: '../adminpreguntassugeridas/config_preguntassugeridas.php',
-                    pk: 'modificarRespuesta',
-                    title: 'Describa su Respuesta',
-                    tpl: "<input type='text' style='width: 300px' maxlength='50'>",
-                    ajaxOptions: {
-                        type: 'GET',
-                        dataType: 'json'
-                    },
-                    success: function(response, newValue) {
-                        if (!response.Confirmar > 0) {
-                            return true;
-                        } else {
-                            return response.msg;
-                        }
-                    }
-                });
+                 $("#tblPsgRespuestas").append(html);
+                 $("input[name='eliminar']").css("background", "#666666 url('../../imagenes/admin_resources/btn_eliminar.png') 1px 1px no-repeat");
+                 $('#res_dscrpcn' + datos[i]["plu_id"]).editable({});
+                
+                
+                // html = "<tr id='idrespuesta_" + datos[i]["plu_id"] + "' orden=\"" + (i + 1) + "\" ondragover=\"allowDrop(event)\" ondragstart=\"drag(event)\" ondrop=\"drop(event)\" draggable=\"true\">";
+                // html += "<td class='text-center'>" + datos[i]["numPlu"] + "</td>";
+                // html += "<td  onclick='fn_seleccion_sugeridas(\"" + datos[i]["res_descripcion"] + "\",  \"" + datos[i]["res_id"] + "\")'>" + datos[i]["plu_num_plu"] +  "<br>" +  '&emsp;'+datos[i]["pregunta_sugerida"] +  "</td>";
+                // html += "<td><a data-type='text' href='#' id='res_dscrpcn" + datos[i]["plu_id"] + "'>" + datos[i]["res_descripcion"] + "</a></td>";
+                // html += "<td style='text-align: center;'><input type='button' name='eliminar' class='opcionAgregado' onclick='fn_eliminarRespuesta(\"" + datos[i]["res_id"] + "\", \"" + datos[i]["plu_id"] + "\" );' style='height: 33px; width: 33px;'/></td></tr>";
+ 
+                //  $("#tblPsgRespuestas").append(html);
+                //  $("input[name='eliminar']").css("background", "#666666 url('../../imagenes/admin_resources/btn_eliminar.png') 1px 1px no-repeat");
+                //  $('#res_dscrpcn' + datos[i]["plu_id"]).editable({});
+                //  $('#res_dscrpcn' + datos[i]["plu_id"]).editable({
+                //     type: 'text',
+                //     url: '../adminpreguntassugeridas/config_preguntassugeridas.php',
+                //     pk: 'modificarRespuesta',
+                //     title: 'Describa su Respuesta',
+                //     tpl: "<input type='text' style='width: 300px' maxlength='50'>",
+                //     ajaxOptions: {
+                //         type: 'GET',
+                //         dataType: 'json'
+                //     },
+                //     success: function(response, newValue) {
+                //         if (!response.Confirmar > 0) {
+                //             return true;
+                //         } else {
+                //             return response.msg;
+                //         }
+                //     }
+                // });
             }
         } else {
             $("#tblPsgRespuestas").append("");
@@ -797,8 +805,10 @@ function fn_cargaRespuestasPreguntaModificada() {
     });
 }
 
+
 //MODIFICAR: ACTUALIZA LA PREGUNTA SUGERIDA
 function mergePreguntaSugerida(accion, idPregunta) {
+   
     var html = "";
     var pregunta = $("#hid_psug_id").val();
     var cadena = "";
@@ -839,6 +849,7 @@ function mergePreguntaSugerida(accion, idPregunta) {
         alertify.error("Grupo de pregunta campo obligatorio");
         return false;
     }
+
     var send = { "mergePreguntaSugerida": 1 };
     send.accion = accion;
     send.descripcion = $("#inpPsgDescripcionPregunta").val();
@@ -855,6 +866,7 @@ function mergePreguntaSugerida(accion, idPregunta) {
         send.estado = "Inactivo";
     }
     send.respuestas = cadena;
+
     $.ajax({
         async: false,
         type: "POST",
@@ -895,7 +907,10 @@ function mergePreguntaSugerida(accion, idPregunta) {
         }
     });
 
+
 }
+
+
 
 //MODIFICAR: CARGA LOS PLUS PARA AGREGAR A LAS RESPUESTAS
 function fn_cargaPlusRespuestaModificar(opcion) {
@@ -1021,6 +1036,11 @@ function fn_cargaPlusRespuestaModificar(opcion) {
         $("#mdl_rdn_pdd_crgnd").hide();
     });
 }
+
+
+
+
+
 
 //MODIFICAR: APLICA RESPUESTAS A LA PREGUNTA SUGERIDA
 function fn_aplicarRespuestaModificada() {

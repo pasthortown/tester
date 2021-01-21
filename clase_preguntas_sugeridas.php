@@ -1,5 +1,4 @@
 <?php
-
 ///////////////////////////////////////////////////////////////////////////
 ////////DESARROLLADO POR JOSE FERNANDEZ////////////////////////////////////
 ///////////DESCRIPCION: Archivo de sentencias sql para manejo de///////////
@@ -14,6 +13,7 @@
 
 class preguntas extends sql {
 
+
     function insertaCabeceraPregunta($accion, $cdnCabecera, $descCabecera, $maxCabecera, $minCabecera, $descPos, $lc_rest, $lc_usuarioId, $respID, $preElimina, $plu, $estado, $respuesta) {
         $lc_query = "exec config.IAE_Cabecera_Preguntas_Sugeridas $accion, $cdnCabecera, '$descCabecera', $maxCabecera, $minCabecera, '$descPos', $lc_rest, '$lc_usuarioId', '$respID', '$preElimina', $plu, '$estado', '$respuesta'";
         if ($this->fn_ejecutarquery($lc_query)) {
@@ -27,6 +27,7 @@ class preguntas extends sql {
 
     function eliminaRespuesta($accion, $cdnCabecera, $descCabecera, $maxCabecera, $minCabecera, $descPos, $lc_rest, $lc_usuarioId, $respID, $preElimina, $plu, $estado, $respuesta) {
         $lc_query = "exec config.IAE_Cabecera_Preguntas_Sugeridas $accion, $cdnCabecera, '$descCabecera', $maxCabecera, $minCabecera, '$descPos', $lc_rest, '$lc_usuarioId', '$respID', $preElimina, $plu, '$estado', '$respuesta'";
+        //print($lc_query);
         return $this->fn_ejecutarquery($lc_query);
     }
 
@@ -89,7 +90,9 @@ class preguntas extends sql {
                     , 'orden' => $row['orden']
                     , 'descripcion' => utf8_encode(trim($row['descripcion']))
                     , 'res_descripcion' => utf8_encode(trim($row['res_descripcion']))
-                    , 'res_id' => utf8_encode(trim($row['res_id'])));
+                    , 'res_id' => utf8_encode(trim($row['res_id']))
+                    , 'pregunta_sugerida' => utf8_encode(trim($row['pregunta_sugerida']))             
+                );
             }
             $this->lc_regs['str'] = $this->fn_numregistro();
         }
@@ -143,6 +146,7 @@ class preguntas extends sql {
 
     function cargaPlus($cdn, $tipo_producto) {
         $lc_query = "exec config.USP_Carga_Select_Plus_Preguntas_Sugeridas $cdn, '$tipo_producto'";
+        //print($lc_query);
         if ($this->fn_ejecutarquery($lc_query)) {
             while ($row = $this->fn_leerarreglo()) {
                 $this->lc_regs[] = array(
@@ -155,7 +159,7 @@ class preguntas extends sql {
         }
         return json_encode($this->lc_regs);
     }
-
+ 
     function cargaPreguntaEliminaPreguntaEliminaProducto($resultado, $accion, $cdn_id, $plu_id, $psug_id, $usr_id, $orden) {
         $lc_query = "exec config.USP_Preguntas_Sugeridas_Plus $resultado, $accion, $cdn_id, $plu_id, '$psug_id', '$usr_id', $orden";
         if ($this->fn_ejecutarquery($lc_query)) {
@@ -184,6 +188,7 @@ class preguntas extends sql {
     function mergePreguntaSugerida($accion, $idCadena, $idPregunta, $descripcion, $minimo, $maximo, $descripcionPos, $nivel, $estado, $respuestas, $lc_usuarioId, $idGrupoPregunta)
     {
         $lc_query = "EXEC config.PREGUNTA_SUGERIDA_IAE_preguntas_sugeridas $accion, $idCadena, '$idPregunta', '" . utf8_decode($descripcion) . "', $minimo, $maximo, '" . utf8_decode($descripcionPos) . "', $nivel, '$estado', '$respuestas','$lc_usuarioId', '$idGrupoPregunta'";
+        // print($lc_query);
         if ($this->fn_ejecutarquery($lc_query)) {
             while ($row = $this->fn_leerarreglo()) {
                 $this->lc_regs[] = array('psug_id' => $row['psug_id'],
@@ -200,6 +205,7 @@ class preguntas extends sql {
         }
         return json_encode($this->lc_regs);
     }
+
 
     function actualizaPreguntaSugerida($idPregunta, $idPreguntaSugerida, $idPreguntaPadre, $lc_usuarioId)
     {

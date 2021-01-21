@@ -42,6 +42,7 @@ include_once '../../clases/clase_seguridades.php';
         <input id="hid_psug_id" type="hidden" />
         <input id="hid_chk" type="hidden" />
 
+
         <div class="superior" id="div_nuevo">
             <div class="menu" style="width: 300px;" align="center">
                 <ul>
@@ -163,6 +164,9 @@ include_once '../../clases/clase_seguridades.php';
             </div>
         </div>
 
+
+
+
         <div class="modal fade" id="mdl_productos_respuesta" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -214,6 +218,7 @@ include_once '../../clases/clase_seguridades.php';
                             </div>                    
                         </div>
                     </div>
+
                     <div class="row" >
                         <div class="col-xs-1"></div>
 
